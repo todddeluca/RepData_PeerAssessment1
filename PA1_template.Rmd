@@ -8,22 +8,131 @@ output:
 
 ## Loading and preprocessing the data
 
-```{r}
-getwd()
+Load the data:
 
+```{r}
+setwd("~/proj/2015/RepData_PeerAssessment1")
+unzip("activity.zip")
+data = read.csv("activity.csv")
+```
+
+Load libraries:
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(lubridate)
 ```
 
 
 ## What is mean total number of steps taken per day?
 
+A histogram of the number of steps taken per day:
+
+```{r}
+# Summarize each day by the total number of steps, ignoring NA values
+stepsPerDay = data %>% group_by(date) %>% summarize(steps=sum(steps, na.rm=TRUE))
+# Plot a histogram of steps per day
+ggplot(stepsPerDay, aes(x=steps)) + geom_histogram() + 
+  labs(title="Histogram of Total Steps per Day", x="Total Steps per Day")
+```
+
+The mean total steps taken per day:
+```{r}
+mean(stepsPerDay$steps)
+```
+
+The median total steps taken per day:
+```{r}
+median(stepsPerDay$steps)
+```
 
 
 ## What is the average daily activity pattern?
 
+A plot of mean steps taken during each 5-minute interval of the day:
+
+```{r}
+meanStepsPerInterval = data %>% group_by(interval) %>% summarize(mean_steps=mean(steps, na.rm=TRUE))
+ggplot(meanStepsPerInterval, aes(x=interval, y=mean_steps)) + geom_line() +
+  labs(title="Mean Steps Taken for 5-Minute Intervals in a Day", x="Minute of the Day", y="Mean Steps")
+```
+
+The 5-minute interval with the highest average number of steps, averaged across days:
+
+```{r}
+filter(meanStepsPerInterval, mean_steps == max(mean_steps))$interval
+```
 
 
 ## Imputing missing values
 
+Total missing values in the dataset:
+
+```{r}
+# Count the number of NAs, using the fact that, numerically, TRUE is 1 and FALSE is 0
+sum(is.na(data$steps))
+```
+
+Confirm that there are no missing date or interval values:
+
+```{r}
+sum(is.na(data$date))
+sum(is.na(data$interval))
+```
+
+Missing values will be imputed using the following strategy: substitute an NA value for the mean number of steps in the corresponding 5-minute interval.
+
+Create a new data set with imputed missing values:
+
+```{r}
+# add a column with the mean steps for each 5-minute interval
+data2 = inner_join(data, meanStepsPerInterval, by="interval")
+# fill NA values with the mean interval steps
+filled_data = mutate(data2, filled_steps=ifelse(is.na(steps), mean_steps, steps))
+```
+
+Make a histogram of total steps taken each day, using imputed values:
+
+```{r}
+# Summarize each day by the total number of steps, using imputed data
+filledStepsPerDay = filled_data %>% group_by(date) %>% summarize(steps=sum(filled_steps))
+# Plot a histogram of steps per day
+ggplot(filledStepsPerDay, aes(x=steps)) + geom_histogram() + 
+  labs(title="Histogram of Total Steps per Day Using Imputed Values", x="Total Steps per Day")
+```
+
+Mean steps taken per day:
+
+```{r}
+mean(filledStepsPerDay$steps)
+```
+
+Median steps taken per day:
+
+```{r}
+median(filledStepsPerDay$steps)
+```
+
+What is the impact of imputing missing data on the estimates of the total daily number of steps?  Including the imputed values in the analysis has raised the mean and median values of the total steps per day.  This makes sense, considering that typically the imputed values are > 0, so including them will typically increase the total steps in a day.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+Create a new dataset with a factor variable indicating whether a day is a "weekday" or a "weekend":
+
+```{r}
+# add day_of_week and day_type (i.e. weekend, weekday) columns
+day_data = mutate(filled_data, day_of_week=weekdays(ymd(date)), day_type=as.factor(ifelse(day_of_week %in% c("Saturday", "Sunday"), "weekend", "weekday")))
+```
+
+Make a panel plot containing a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis):
+
+```{r}
+meanStepsPerIntervalAndDayType = day_data %>% group_by(interval, day_type) %>% summarize(mean_filled_steps=mean(filled_steps))
+ggplot(meanStepsPerIntervalAndDayType, aes(x=interval, y=mean_filled_steps)) +
+  geom_line() + facet_grid(day_type ~ .) +
+  labs(title="Mean Steps Taken for 5-Minute Intervals in a Day", 
+       x="Minute of Day", y="Mean Steps Taken per 5-minute Interval")
+```
+
