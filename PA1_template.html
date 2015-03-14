@@ -221,9 +221,9 @@ library(lubridate)
 
 <p>A histogram of the number of steps taken per day:</p>
 
-<pre><code class="r"># Summarize each day by the total number of steps, ignoring NA values
+<pre><code class="r">## Summarize each day by the total number of steps, ignoring NA values
 stepsPerDay = data %&gt;% group_by(date) %&gt;% summarize(steps=sum(steps, na.rm=TRUE))
-# Plot a histogram of steps per day
+## Plot a histogram of steps per day
 ggplot(stepsPerDay, aes(x=steps)) + geom_histogram() + 
   labs(title=&quot;Histogram of Total Steps per Day&quot;, x=&quot;Total Steps per Day&quot;)
 </code></pre>
@@ -272,7 +272,7 @@ ggplot(meanStepsPerInterval, aes(x=interval, y=mean_steps)) + geom_line() +
 
 <p>Total missing values in the dataset:</p>
 
-<pre><code class="r"># Count the number of NAs, using the fact that, numerically, TRUE is 1 and FALSE is 0
+<pre><code class="r">## Count the number of NAs, using the fact that, numerically, TRUE is 1 and FALSE is 0
 sum(is.na(data$steps))
 </code></pre>
 
@@ -297,17 +297,17 @@ sum(is.na(data$steps))
 
 <p>Create a new data set with imputed missing values:</p>
 
-<pre><code class="r"># add a column with the mean steps for each 5-minute interval
+<pre><code class="r">## add a column with the mean steps for each 5-minute interval
 data2 = inner_join(data, meanStepsPerInterval, by=&quot;interval&quot;)
-# fill NA values with the mean interval steps
+## fill NA values with the mean interval steps
 filled_data = mutate(data2, filled_steps=ifelse(is.na(steps), mean_steps, steps))
 </code></pre>
 
 <p>Make a histogram of total steps taken each day, using imputed values:</p>
 
-<pre><code class="r"># Summarize each day by the total number of steps, using imputed data
+<pre><code class="r">## Summarize each day by the total number of steps, using imputed data
 filledStepsPerDay = filled_data %&gt;% group_by(date) %&gt;% summarize(steps=sum(filled_steps))
-# Plot a histogram of steps per day
+## Plot a histogram of steps per day
 ggplot(filledStepsPerDay, aes(x=steps)) + geom_histogram() + 
   labs(title=&quot;Histogram of Total Steps per Day Using Imputed Values&quot;, x=&quot;Total Steps per Day&quot;)
 </code></pre>
@@ -339,7 +339,7 @@ ggplot(filledStepsPerDay, aes(x=steps)) + geom_histogram() +
 
 <p>Create a new dataset with a factor variable indicating whether a day is a &ldquo;weekday&rdquo; or a &ldquo;weekend&rdquo;:</p>
 
-<pre><code class="r"># add day_of_week and day_type (i.e. weekend, weekday) columns
+<pre><code class="r">## add day_of_week and day_type (i.e. weekend, weekday) columns
 day_data = mutate(filled_data, day_of_week=weekdays(ymd(date)), day_type=as.factor(ifelse(day_of_week %in% c(&quot;Saturday&quot;, &quot;Sunday&quot;), &quot;weekend&quot;, &quot;weekday&quot;)))
 </code></pre>
 

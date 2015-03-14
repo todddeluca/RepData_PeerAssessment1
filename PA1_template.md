@@ -33,9 +33,9 @@ A histogram of the number of steps taken per day:
 
 
 ```r
-# Summarize each day by the total number of steps, ignoring NA values
+## Summarize each day by the total number of steps, ignoring NA values
 stepsPerDay = data %>% group_by(date) %>% summarize(steps=sum(steps, na.rm=TRUE))
-# Plot a histogram of steps per day
+## Plot a histogram of steps per day
 ggplot(stepsPerDay, aes(x=steps)) + geom_histogram() + 
   labs(title="Histogram of Total Steps per Day", x="Total Steps per Day")
 ```
@@ -98,7 +98,7 @@ Total missing values in the dataset:
 
 
 ```r
-# Count the number of NAs, using the fact that, numerically, TRUE is 1 and FALSE is 0
+## Count the number of NAs, using the fact that, numerically, TRUE is 1 and FALSE is 0
 sum(is.na(data$steps))
 ```
 
@@ -131,9 +131,9 @@ Create a new data set with imputed missing values:
 
 
 ```r
-# add a column with the mean steps for each 5-minute interval
+## add a column with the mean steps for each 5-minute interval
 data2 = inner_join(data, meanStepsPerInterval, by="interval")
-# fill NA values with the mean interval steps
+## fill NA values with the mean interval steps
 filled_data = mutate(data2, filled_steps=ifelse(is.na(steps), mean_steps, steps))
 ```
 
@@ -141,9 +141,9 @@ Make a histogram of total steps taken each day, using imputed values:
 
 
 ```r
-# Summarize each day by the total number of steps, using imputed data
+## Summarize each day by the total number of steps, using imputed data
 filledStepsPerDay = filled_data %>% group_by(date) %>% summarize(steps=sum(filled_steps))
-# Plot a histogram of steps per day
+## Plot a histogram of steps per day
 ggplot(filledStepsPerDay, aes(x=steps)) + geom_histogram() + 
   labs(title="Histogram of Total Steps per Day Using Imputed Values", x="Total Steps per Day")
 ```
@@ -185,7 +185,7 @@ Create a new dataset with a factor variable indicating whether a day is a "weekd
 
 
 ```r
-# add day_of_week and day_type (i.e. weekend, weekday) columns
+## add day_of_week and day_type (i.e. weekend, weekday) columns
 day_data = mutate(filled_data, day_of_week=weekdays(ymd(date)), day_type=as.factor(ifelse(day_of_week %in% c("Saturday", "Sunday"), "weekend", "weekday")))
 ```
 
