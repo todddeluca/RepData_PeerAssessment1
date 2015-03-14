@@ -8,6 +8,10 @@ output:
 
 ## Loading and preprocessing the data
 
+```{r}
+getwd()
+
+```
 
 
 ## What is mean total number of steps taken per day?
